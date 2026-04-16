@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dompetku — Lacak Pengeluaran</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+  <!-- Background decoration -->
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+
+  <div class="app-wrapper">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <span class="logo-icon">◈</span>
+        <span class="logo-text">dompetku</span>
+      </div>
+      <div class="balance-pill">
+        <span class="balance-label">Total Pengeluaran</span>
+        <span class="balance-amount" id="totalBalance">Rp 0</span>
+      </div>
+    </header>
+
+    <main class="app-main">
+
+      <!-- Left Column: Form + List -->
+      <section class="left-col">
+
+        <!-- Input Form -->
+        <div class="card form-card">
+          <h2 class="card-title">Tambah Transaksi</h2>
+          <form id="transactionForm" novalidate>
+            <div class="field-group">
+              <label for="itemName">Nama Item</label>
+              <input type="text" id="itemName" placeholder="Contoh: Kopi susu" autocomplete="off"/>
+              <span class="field-error" id="errorName"></span>
+            </div>
+            <div class="field-row">
+              <div class="field-group">
+                <label for="itemAmount">Jumlah (Rp)</label>
+                <input type="number" id="itemAmount" placeholder="25000" min="0"/>
+                <span class="field-error" id="errorAmount"></span>
+              </div>
+              <div class="field-group">
+                <label for="itemCategory">Kategori</label>
+                <div class="select-wrapper">
+                  <select id="itemCategory">
+                    <option value="">Pilih…</option>
+                    <option value="Makanan">🍜 Makanan</option>
+                    <option value="Transportasi">🚌 Transportasi</option>
+                    <option value="Hiburan">🎮 Hiburan</option>
+                  </select>
+                </div>
+                <span class="field-error" id="errorCategory"></span>
+              </div>
+            </div>
+            <button type="submit" class="btn-add">
+              <span class="btn-icon">+</span>
+              Tambah Transaksi
+            </button>
+          </form>
+        </div>
+
+        <!-- Transaction List -->
+        <div class="card list-card">
+          <div class="list-header">
+            <h2 class="card-title">Riwayat</h2>
+            <span class="tx-count" id="txCount">0 transaksi</span>
+          </div>
+          <div class="tx-list" id="transactionList">
+            <div class="empty-state" id="emptyState">
+              <div class="empty-icon">◎</div>
+              <p>Belum ada transaksi.<br/>Mulai catat pengeluaranmu!</p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Right Column: Chart + Category Summary -->
+      <section class="right-col">
+
+        <div class="card chart-card">
+          <h2 class="card-title">Distribusi Pengeluaran</h2>
+          <div class="chart-container">
+            <canvas id="expenseChart"></canvas>
+            <div class="chart-empty" id="chartEmpty">
+              <span class="empty-icon">◎</span>
+              <p>Tambah transaksi untuk melihat grafik</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card summary-card">
+          <h2 class="card-title">Per Kategori</h2>
+          <div class="category-summary" id="categorySummary">
+            <div class="cat-item" data-cat="Makanan">
+              <div class="cat-dot" style="background: var(--c-food)"></div>
+              <span class="cat-name">Makanan</span>
+              <span class="cat-bar-wrap"><span class="cat-bar" id="barMakanan"></span></span>
+              <span class="cat-total" id="totalMakanan">Rp 0</span>
+            </div>
+            <div class="cat-item" data-cat="Transportasi">
+              <div class="cat-dot" style="background: var(--c-transport)"></div>
+              <span class="cat-name">Transportasi</span>
+              <span class="cat-bar-wrap"><span class="cat-bar" id="barTransportasi"></span></span>
+              <span class="cat-total" id="totalTransportasi">Rp 0</span>
+            </div>
+            <div class="cat-item" data-cat="Hiburan">
+              <div class="cat-dot" style="background: var(--c-entertain)"></div>
+              <span class="cat-name">Hiburan</span>
+              <span class="cat-bar-wrap"><span class="cat-bar" id="barHiburan"></span></span>
+              <span class="cat-total" id="totalHiburan">Rp 0</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
