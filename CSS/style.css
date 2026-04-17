@@ -40,6 +40,23 @@ body {
   position: relative;
 }
 
+/* ─── Light Mode Overrides ──────────────────────────────────── */
+body.light {
+  --bg:          #f0f2f8;
+  --surface:     #ffffff;
+  --surface-2:   #e8eaf2;
+  --border:      rgba(0,0,0,0.08);
+  --border-2:    rgba(0,0,0,0.14);
+  --text-1:      #111827;
+  --text-2:      #4b5563;
+  --text-3:      #9ca3af;
+  --accent-soft: rgba(123,110,246,0.1);
+  --shadow-card: 0 2px 24px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.8) inset;
+}
+
+body.light .bg-blob { opacity: 0.10; }
+body.light .tx-item:hover { background: #f5f6fa; }
+
 /* ─── Animated Background Blobs ────────────────────────────── */
 .bg-blob {
   position: fixed;
