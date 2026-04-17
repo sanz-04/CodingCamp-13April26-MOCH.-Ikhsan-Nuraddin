@@ -554,6 +554,295 @@ select { padding-right: 32px; cursor: pointer; }
   box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 
+/* ─── Manage Category Button ────────────────────────────────── */
+.btn-manage-cat {
+  margin-top: 8px;
+  background: none;
+  border: 1px dashed var(--border-2);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-family: 'DM Sans', sans-serif;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+  width: 100%;
+}
+.btn-manage-cat:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+/* ─── Modal ─────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-lg);
+  width: min(420px, 92vw);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  transform: translateY(16px);
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-overlay.open .modal-box { transform: translateY(0); }
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+}
+.modal-header h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color var(--transition), background var(--transition);
+}
+.modal-close:hover { color: var(--c-food); background: rgba(249,112,102,0.12); }
+.modal-body { padding: 16px 24px 24px; }
+
+/* ─── Emoji & Color Pickers ─────────────────────────────────── */
+.emoji-picker, .color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+.emoji-btn {
+  width: 36px; height: 36px;
+  border: 2px solid var(--border-2);
+  border-radius: 8px;
+  background: var(--surface-2);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color var(--transition), transform var(--transition);
+}
+.emoji-btn:hover { transform: scale(1.15); }
+.emoji-btn.active { border-color: var(--accent); background: var(--accent-soft); }
+
+.color-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform var(--transition), border-color var(--transition);
+}
+.color-btn:hover { transform: scale(1.2); }
+.color-btn.active { border-color: var(--text-1); }
+
+/* ─── Custom Cat List inside Modal ──────────────────────────── */
+.custom-cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+}
+.custom-cat-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+}
+.custom-cat-row .cat-badge {
+  font-size: 1rem;
+}
+.custom-cat-row .cat-badge-name {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.custom-cat-row .btn-delete-cat {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color var(--transition), background var(--transition);
+}
+.custom-cat-row .btn-delete-cat:hover {
+  color: var(--c-food);
+  background: rgba(249,112,102,0.12);
+}
+
+/* ─── List Controls: Sort + Limit ───────────────────────────── */
+.list-controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 120px;
+}
+.control-group label {
+  font-size: 0.7rem;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.select-wrapper.mini select,
+.limit-input {
+  padding: 7px 10px;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  color: var(--text-1);
+  font-family: 'DM Sans', sans-serif;
+  width: 100%;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.select-wrapper.mini select:focus,
+.limit-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.limit-input::placeholder { color: var(--text-3); }
+
+/* ─── Over-limit Highlight ───────────────────────────────────── */
+.tx-item.over-limit {
+  border-color: var(--c-food);
+  background: rgba(249,112,102,0.07);
+  position: relative;
+}
+.tx-item.over-limit::before {
+  content: '⚠';
+  position: absolute;
+  top: -8px;
+  right: 10px;
+  font-size: 0.7rem;
+  background: var(--c-food);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 20px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Monthly Summary Card ───────────────────────────────────── */
+.monthly-card { }
+.monthly-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.month-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  color: var(--text-2);
+  border-radius: 6px;
+  width: 26px; height: 26px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition), color var(--transition);
+}
+.month-btn:hover { background: var(--accent-soft); color: var(--accent); }
+.month-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-2);
+  min-width: 90px;
+  text-align: center;
+}
+.monthly-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.mstat {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mstat-label {
+  font-size: 0.68rem;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.mstat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+.monthly-cat-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mcat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+.mcat-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.mcat-name { color: var(--text-2); flex: 1; }
+.mcat-total {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--text-1);
+}
+
 /* ─── Responsive ────────────────────────────────────────────── */
 @media (max-width: 720px) {
   .app-main {
