@@ -54,14 +54,16 @@
                 <input type="number" id="itemAmount" placeholder="25000" min="0"/>
                 <span class="field-error" id="errorAmount"></span>
               </div>
-              <div class="field-group">
-                <label for="itemCategory">Kategori</label>
-                <div class="select-wrapper">
-                  <select id="itemCategory">
-                    <option value="">Pilih…</option>
-                    <option value="Makanan">🍜 Makanan</option>
-                    <option value="Transportasi">🚌 Transportasi</option>
-                    <option value="Hiburan">🎮 Hiburan</option>
+              <select id="itemCategory">
+              <div class="select-wrapper">
+             <select id="itemCategory">
+            <option value="">Pilih…</option>
+            <option value="Transportasi">🚌 Transportasi</option>
+            <option value="Hiburan">🎮 Hiburan</option>
+          </select>
+          <option value="Makanan">🍜 Makanan</option>
+          <button type="button" class="btn-manage-cat" id="btnManageCat" title="Kelola kategori">＋ kategori</button>
+        </div>
                   </select>
                 </div>
                 <span class="field-error" id="errorCategory"></span>
@@ -76,17 +78,38 @@
 
         <!-- Transaction List -->
         <div class="card list-card">
-          <div class="list-header">
-            <h2 class="card-title">Riwayat</h2>
-            <span class="tx-count" id="txCount">0 transaksi</span>
-          </div>
-          <div class="tx-list" id="transactionList">
-            <div class="empty-state" id="emptyState">
-              <div class="empty-icon">◎</div>
-              <p>Belum ada transaksi.<br/>Mulai catat pengeluaranmu!</p>
-            </div>
-          </div>
-        </div>
+          <div class="card list-card">
+  <div class="list-header">
+    <h2 class="card-title">Riwayat</h2>
+    <span class="tx-count" id="txCount">0 transaksi</span>
+  </div>
+
+  <!-- Controls: Sort + Limit -->
+  <div class="list-controls">
+    <div class="control-group">
+      <label>Urutkan</label>
+      <div class="select-wrapper mini">
+        <select id="sortSelect">
+          <option value="date">Terbaru</option>
+          <option value="amount-desc">Jumlah ↓</option>
+          <option value="amount-asc">Jumlah ↑</option>
+          <option value="category">Kategori</option>
+        </select>
+      </div>
+    </div>
+    <div class="control-group">
+      <label>Batas (Rp)</label>
+      <input type="number" id="limitInput" class="limit-input" placeholder="Tidak ada" min="0"/>
+    </div>
+  </div>
+
+  <div class="tx-list" id="transactionList">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">◎</div>
+      <p>Belum ada transaksi.<br/>Mulai catat pengeluaranmu!</p>
+    </div>
+  </div>
+</div>
 
       </section>
 
@@ -133,5 +156,55 @@
   </div>
 
   <script src="js/app.js"></script>
+
+  <!-- Modal: Tambah Kategori Kustom -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Kelola Kategori</h3>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label for="customCatName">Nama Kategori</label>
+        <input type="text" id="customCatName" placeholder="Contoh: Kesehatan" maxlength="20"/>
+      </div>
+      <div class="field-group" style="margin-top:12px">
+        <label>Ikon</label>
+        <div class="emoji-picker" id="emojiPicker">
+          <button class="emoji-btn active" data-emoji="⭐">⭐</button>
+          <button class="emoji-btn" data-emoji="🏥">🏥</button>
+          <button class="emoji-btn" data-emoji="📚">📚</button>
+          <button class="emoji-btn" data-emoji="👗">👗</button>
+          <button class="emoji-btn" data-emoji="💊">💊</button>
+          <button class="emoji-btn" data-emoji="🏋️">🏋️</button>
+          <button class="emoji-btn" data-emoji="🐾">🐾</button>
+          <button class="emoji-btn" data-emoji="🎁">🎁</button>
+          <button class="emoji-btn" data-emoji="🔧">🔧</button>
+          <button class="emoji-btn" data-emoji="✈️">✈️</button>
+        </div>
+      </div>
+      <div class="field-group" style="margin-top:12px">
+        <label>Warna</label>
+        <div class="color-picker" id="colorPicker">
+          <button class="color-btn active" data-color="#a78bfa" style="background:#a78bfa"></button>
+          <button class="color-btn" data-color="#fb923c" style="background:#fb923c"></button>
+          <button class="color-btn" data-color="#f472b6" style="background:#f472b6"></button>
+          <button class="color-btn" data-color="#facc15" style="background:#facc15"></button>
+          <button class="color-btn" data-color="#4ade80" style="background:#4ade80"></button>
+          <button class="color-btn" data-color="#22d3ee" style="background:#22d3ee"></button>
+          <button class="color-btn" data-color="#f87171" style="background:#f87171"></button>
+          <button class="color-btn" data-color="#94a3b8" style="background:#94a3b8"></button>
+        </div>
+      </div>
+      <span class="field-error" id="errorCustomCat" style="margin-top:8px;display:block"></span>
+      <button class="btn-add" id="btnAddCustomCat" style="margin-top:16px">
+        <span class="btn-icon">+</span> Tambah Kategori
+      </button>
+      <div class="custom-cat-list" id="customCatList"></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
