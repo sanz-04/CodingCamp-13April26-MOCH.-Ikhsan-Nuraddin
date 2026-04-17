@@ -258,5 +258,29 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+/* ─── Dark / Light Mode ──────────────────────────────────────── */
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon   = document.getElementById('themeIcon');
+const THEME_KEY   = 'dompetku_theme';
+
+function applyTheme(theme) {
+  if (theme === 'light') {
+    document.body.classList.add('light');
+    themeIcon.textContent = '🌙';
+  } else {
+    document.body.classList.remove('light');
+    themeIcon.textContent = '☀️';
+  }
+  localStorage.setItem(THEME_KEY, theme);
+}
+
+themeToggle.addEventListener('click', () => {
+  const isLight = document.body.classList.contains('light');
+  applyTheme(isLight ? 'dark' : 'light');
+});
+
+// Load saved theme on startup
+applyTheme(localStorage.getItem(THEME_KEY) ?? 'dark');
+
 /* ─── Init ───────────────────────────────────────────────────── */
 renderAll();
