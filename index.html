@@ -136,6 +136,38 @@
               <span class="cat-bar-wrap"><span class="cat-bar" id="barMakanan"></span></span>
               <span class="cat-total" id="totalMakanan">Rp 0</span>
             </div>
+            
+            <!-- Monthly Summary -->
+<div class="card monthly-card">
+  <div class="monthly-header">
+    <h2 class="card-title" style="margin-bottom:0">Ringkasan Bulanan</h2>
+    <div class="month-nav">
+      <button class="month-btn" id="prevMonth">‹</button>
+      <span class="month-label" id="monthLabel">—</span>
+      <button class="month-btn" id="nextMonth">›</button>
+    </div>
+  </div>
+  <div class="monthly-stats" id="monthlyStats">
+    <div class="mstat">
+      <span class="mstat-label">Total</span>
+      <span class="mstat-val" id="mTotal">Rp 0</span>
+    </div>
+    <div class="mstat">
+      <span class="mstat-label">Transaksi</span>
+      <span class="mstat-val" id="mCount">0</span>
+    </div>
+    <div class="mstat">
+      <span class="mstat-label">Terbesar</span>
+      <span class="mstat-val" id="mMax">Rp 0</span>
+    </div>
+    <div class="mstat">
+      <span class="mstat-label">Rata-rata</span>
+      <span class="mstat-val" id="mAvg">Rp 0</span>
+    </div>
+  </div>
+  <div class="monthly-cat-breakdown" id="monthlyCatBreakdown"></div>
+</div>
+
             <div class="cat-item" data-cat="Transportasi">
               <div class="cat-dot" style="background: var(--c-transport)"></div>
               <span class="cat-name">Transportasi</span>
