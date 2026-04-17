@@ -1,40 +1,71 @@
 /* ─── State ──────────────────────────────────────────────────── */
-const STORAGE_KEY = 'dompetku_transactions';
-const CATEGORY_EMOJI = { Makanan: '🍜', Transportasi: '🚌', Hiburan: '🎮' };
-const CATEGORY_COLORS = {
-  Makanan:      '#f97066',
-  Transportasi: '#38bdf8',
-  Hiburan:      '#34d399',
-};
+const STORAGE_KEY    = 'dompetku_transactions';
+const THEME_KEY      = 'dompetku_theme';
+const CUSTOM_CAT_KEY = 'dompetku_custom_cats';
+const LIMIT_KEY      = 'dompetku_limit';
 
-let transactions = loadFromStorage();
-let chart = null;
+// Default categories
+const DEFAULT_CATS = [
+  { name: 'Makanan',      emoji: '🍜', color: '#f97066' },
+  { name: 'Transportasi', emoji: '🚌', color: '#38bdf8' },
+  { name: 'Hiburan',      emoji: '🎮', color: '#34d399' },
+];
+
+let customCategories = loadCustomCats();
+let transactions     = loadFromStorage();
+let chart            = null;
+let currentMonth     = new Date().getMonth();
+let currentYear      = new Date().getFullYear();
+let spendingLimit    = parseFloat(localStorage.getItem(LIMIT_KEY)) || 0;
+let sortMode         = 'date';
+
+// Helpers: merged category list
+function allCategories() {
+  return [...DEFAULT_CATS, ...customCategories];
+}
+function getCatMeta(name) {
+  return allCategories().find(c => c.name === name)
+    || { name, emoji: '💸', color: '#8a90a8' };
+}
+// Keep CATEGORY_COLORS dynamic
+function getCategoryColors() {
+  const obj = {};
+  allCategories().forEach(c => { obj[c.name] = c.color; });
+  return obj;
+}
 
 /* ─── Storage Helpers ────────────────────────────────────────── */
 function loadFromStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 }
-
 function saveToStorage() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
 }
+function loadCustomCats() {
+  try {
+    const raw = localStorage.getItem(CUSTOM_CAT_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+function saveCustomCats() {
+  localStorage.setItem(CUSTOM_CAT_KEY, JSON.stringify(customCategories));
+}
 
 /* ─── DOM References ─────────────────────────────────────────── */
-const form          = document.getElementById('transactionForm');
-const inputName     = document.getElementById('itemName');
-const inputAmount   = document.getElementById('itemAmount');
-const inputCategory = document.getElementById('itemCategory');
-const totalBalance  = document.getElementById('totalBalance');
-const txList        = document.getElementById('transactionList');
-const emptyState    = document.getElementById('emptyState');
-const txCount       = document.getElementById('txCount');
-const chartEmpty    = document.getElementById('chartEmpty');
-const chartCanvas   = document.getElementById('expenseChart');
+const sortSelect    = document.getElementById('sortSelect');
+const limitInput    = document.getElementById('limitInput');
+const modalOverlay  = document.getElementById('modalOverlay');
+const modalClose    = document.getElementById('modalClose');
+const btnManageCat  = document.getElementById('btnManageCat');
+const btnAddCustCat = document.getElementById('btnAddCustomCat');
+const customCatName = document.getElementById('customCatName');
+const customCatList = document.getElementById('customCatList');
+const prevMonthBtn  = document.getElementById('prevMonth');
+const nextMonthBtn  = document.getElementById('nextMonth');
+const monthLabel    = document.getElementById('monthLabel');
 
 /* ─── Form Submission ────────────────────────────────────────── */
 form.addEventListener('submit', (e) => {
@@ -103,6 +134,167 @@ function deleteTransaction(id) {
   renderAll();
 }
 
+/* ─── Sort & Limit Controls ─────────────────────────────────── */
+sortSelect.addEventListener('change', () => {
+  sortMode = sortSelect.value;
+  renderList();
+});
+
+if (spendingLimit > 0) limitInput.value = spendingLimit;
+limitInput.addEventListener('input', () => {
+  spendingLimit = parseFloat(limitInput.value) || 0;
+  localStorage.setItem(LIMIT_KEY, spendingLimit);
+  renderList();
+});
+
+function getSortedTransactions() {
+  const list = [...transactions];
+  if (sortMode === 'amount-desc') return list.sort((a,b) => b.amount - a.amount);
+  if (sortMode === 'amount-asc')  return list.sort((a,b) => a.amount - b.amount);
+  if (sortMode === 'category')    return list.sort((a,b) => a.category.localeCompare(b.category));
+  return list; // 'date' = original insert order
+}
+
+/* ─── Custom Category Modal ──────────────────────────────────── */
+let selectedEmoji = '⭐';
+let selectedColor = '#a78bfa';
+
+btnManageCat.addEventListener('click', () => {
+  renderCustomCatList();
+  modalOverlay.classList.add('open');
+});
+modalClose.addEventListener('click', () => modalOverlay.classList.remove('open'));
+modalOverlay.addEventListener('click', (e) => {
+  if (e.target === modalOverlay) modalOverlay.classList.remove('open');
+});
+
+document.getElementById('emojiPicker').addEventListener('click', (e) => {
+  const btn = e.target.closest('.emoji-btn');
+  if (!btn) return;
+  document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedEmoji = btn.dataset.emoji;
+});
+
+document.getElementById('colorPicker').addEventListener('click', (e) => {
+  const btn = e.target.closest('.color-btn');
+  if (!btn) return;
+  document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedColor = btn.dataset.color;
+});
+
+btnAddCustCat.addEventListener('click', () => {
+  const name = customCatName.value.trim();
+  const errEl = document.getElementById('errorCustomCat');
+  errEl.textContent = '';
+
+  if (!name) { errEl.textContent = 'Nama kategori wajib diisi.'; return; }
+  if (allCategories().some(c => c.name.toLowerCase() === name.toLowerCase())) {
+    errEl.textContent = 'Kategori sudah ada.'; return;
+  }
+
+  customCategories.push({ name, emoji: selectedEmoji, color: selectedColor });
+  saveCustomCats();
+  customCatName.value = '';
+  refreshCategorySelect();
+  renderCustomCatList();
+  renderCategorySummary();
+  renderChart();
+});
+
+function renderCustomCatList() {
+  customCatList.innerHTML = '';
+  if (customCategories.length === 0) {
+    customCatList.innerHTML = '<p style="font-size:0.78rem;color:var(--text-3);text-align:center;margin-top:8px">Belum ada kategori kustom.</p>';
+    return;
+  }
+  customCategories.forEach((cat, idx) => {
+    const row = document.createElement('div');
+    row.className = 'custom-cat-row';
+    row.innerHTML = `
+      <span class="cat-badge">${cat.emoji}</span>
+      <span class="cat-badge-name" style="color:${cat.color}">${escapeHtml(cat.name)}</span>
+      <button class="btn-delete-cat" data-idx="${idx}">✕</button>
+    `;
+    customCatList.appendChild(row);
+  });
+  customCatList.querySelectorAll('.btn-delete-cat').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      customCategories.splice(idx, 1);
+      saveCustomCats();
+      refreshCategorySelect();
+      renderCustomCatList();
+      renderAll();
+    });
+  });
+}
+
+function refreshCategorySelect() {
+  const sel = document.getElementById('itemCategory');
+  sel.innerHTML = '<option value="">Pilih…</option>';
+  allCategories().forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat.name;
+    opt.textContent = `${cat.emoji} ${cat.name}`;
+    sel.appendChild(opt);
+  });
+}
+
+/* ─── Monthly Summary ────────────────────────────────────────── */
+prevMonthBtn.addEventListener('click', () => {
+  currentMonth--;
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  renderMonthlySummary();
+});
+nextMonthBtn.addEventListener('click', () => {
+  currentMonth++;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  renderMonthlySummary();
+});
+
+function renderMonthlySummary() {
+  const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  monthLabel.textContent = `${MONTHS[currentMonth]} ${currentYear}`;
+
+  const filtered = transactions.filter(tx => {
+    const d = new Date(tx.id); // id = Date.now() saat dibuat
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+
+  const total = filtered.reduce((s, t) => s + t.amount, 0);
+  const max   = filtered.length ? Math.max(...filtered.map(t => t.amount)) : 0;
+  const avg   = filtered.length ? total / filtered.length : 0;
+
+  document.getElementById('mTotal').textContent = formatRupiah(total);
+  document.getElementById('mCount').textContent = filtered.length;
+  document.getElementById('mMax').textContent   = formatRupiah(max);
+  document.getElementById('mAvg').textContent   = formatRupiah(avg);
+
+  // Per-category breakdown
+  const breakdown = {};
+  filtered.forEach(tx => {
+    breakdown[tx.category] = (breakdown[tx.category] || 0) + tx.amount;
+  });
+  const breakdownEl = document.getElementById('monthlyCatBreakdown');
+  breakdownEl.innerHTML = '';
+  Object.entries(breakdown).sort((a,b) => b[1]-a[1]).forEach(([cat, amt]) => {
+    const meta = getCatMeta(cat);
+    const row = document.createElement('div');
+    row.className = 'mcat-row';
+    row.innerHTML = `
+      <div class="mcat-dot" style="background:${meta.color}"></div>
+      <span class="mcat-name">${meta.emoji} ${escapeHtml(cat)}</span>
+      <span class="mcat-total">${formatRupiah(amt)}</span>
+    `;
+    breakdownEl.appendChild(row);
+  });
+  if (!filtered.length) {
+    breakdownEl.innerHTML = '<p style="font-size:0.78rem;color:var(--text-3);text-align:center">Tidak ada transaksi bulan ini.</p>';
+  }
+}
+
 /* ─── Render All ─────────────────────────────────────────────── */
 function renderAll() {
   renderList();
@@ -113,37 +305,33 @@ function renderAll() {
 
 /* ─── Render List ────────────────────────────────────────────── */
 function renderList() {
-  const count = transactions.length;
-  txCount.textContent = `${count} transaksi`;
+  const sorted = getSortedTransactions();
+  txCount.textContent = `${sorted.length} transaksi`;
 
-  // Remove existing tx items (keep emptyState in DOM)
   const existing = txList.querySelectorAll('.tx-item');
   existing.forEach(el => el.remove());
 
-  if (count === 0) {
-    emptyState.style.display = 'flex';
-    return;
-  }
-
+  if (sorted.length === 0) { emptyState.style.display = 'flex'; return; }
   emptyState.style.display = 'none';
 
-  transactions.forEach(tx => {
-    const item = document.createElement('div');
-    item.className = 'tx-item';
+  sorted.forEach(tx => {
+    const meta    = getCatMeta(tx.category);
+    const isOver  = spendingLimit > 0 && tx.amount > spendingLimit;
+    const item    = document.createElement('div');
+    item.className = `tx-item${isOver ? ' over-limit' : ''}`;
     item.dataset.id = tx.id;
     item.innerHTML = `
-      <div class="tx-icon ${tx.category}">${CATEGORY_EMOJI[tx.category] ?? '💸'}</div>
+      <div class="tx-icon" style="background:${meta.color}22">${meta.emoji}</div>
       <div class="tx-details">
         <div class="tx-name">${escapeHtml(tx.name)}</div>
         <div class="tx-cat">${tx.category} · ${tx.date}</div>
       </div>
-      <div class="tx-amount ${tx.category}">${formatRupiah(tx.amount)}</div>
+      <div class="tx-amount" style="color:${meta.color}">${formatRupiah(tx.amount)}</div>
       <button class="btn-delete" title="Hapus" data-id="${tx.id}">✕</button>
     `;
     txList.appendChild(item);
   });
 
-  // Delegate delete clicks
   txList.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', () => deleteTransaction(Number(btn.dataset.id)));
   });
@@ -160,7 +348,7 @@ function renderChart() {
   const totals = getCategoryTotals();
   const labels = Object.keys(totals).filter(k => totals[k] > 0);
   const data   = labels.map(k => totals[k]);
-  const colors = labels.map(k => CATEGORY_COLORS[k]);
+  const colors = labels.map(k => getCategoryColors()[k] || '#8a90a8');
 
   if (labels.length === 0) {
     chartEmpty.style.opacity = '1';
@@ -232,9 +420,10 @@ function renderCategorySummary() {
   ['Makanan', 'Transportasi', 'Hiburan'].forEach(cat => {
     const amt = totals[cat] ?? 0;
     const pct = grand > 0 ? (amt / grand) * 100 : 0;
-
-    document.getElementById(`total${cat}`).textContent = formatRupiah(amt);
-    document.getElementById(`bar${cat}`).style.width = `${pct}%`;
+    const el  = document.getElementById(`total${cat}`);
+    const bar = document.getElementById(`bar${cat}`);
+    if (el)  el.textContent   = formatRupiah(amt);
+    if (bar) bar.style.width  = `${pct}%`;
   });
 }
 
@@ -283,4 +472,14 @@ themeToggle.addEventListener('click', () => {
 applyTheme(localStorage.getItem(THEME_KEY) ?? 'dark');
 
 /* ─── Init ───────────────────────────────────────────────────── */
+refreshCategorySelect();
 renderAll();
+function renderAll() {
+  renderList();
+  renderTotal();
+  renderChart();
+  renderCategorySummary();
+  renderMonthlySummary();
+}
+renderMonthlySummary();
+if (spendingLimit > 0) limitInput.value = spendingLimit;
