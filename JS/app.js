@@ -1,6 +1,5 @@
 /* ─── State ──────────────────────────────────────────────────── */
 const STORAGE_KEY    = 'dompetku_transactions';
-const THEME_KEY      = 'dompetku_theme';
 const CUSTOM_CAT_KEY = 'dompetku_custom_cats';
 const LIMIT_KEY      = 'dompetku_limit';
 
